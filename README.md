@@ -1,2 +1,3 @@
 # gh-sso
-Organization SSO User Management for Github.com
+
+Organization & Enterprise SSO User Management for Github.com
