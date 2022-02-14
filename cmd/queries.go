@@ -76,4 +76,39 @@ var (
 			} `graphql:"samlIdentityProvider"`
 		} `graphql:"organization(login: $organizationName)"`
 	}
+
+	// EnterpriseRepositoriesQuery lists the organizations in the enterprise.
+	EnterpriseOrganizationsQuery struct {
+		Enterprise struct {
+			Organizations struct {
+				Edges []struct {
+					Node struct {
+						Login githubv4.String `graphql:"login"`
+					} `graphql:"node"`
+				} `graphql:"edges"`
+				PageInfo struct {
+					EndCursor   githubv4.String  `graphql:"endCursor"`
+					HasNextPage githubv4.Boolean `graphql:"hasNextPage"`
+				} `graphql:"pageInfo"`
+			} `graphql:"organizations(first: 100, after: $cursor1)"`
+		} `graphql:"enterprise(slug: $enterpriseName)"`
+	}
+
+	// OrganizationRepositoriesQuery lists the repositories in the organization.
+	OrganizationRepositoriesQuery struct {
+		Organization struct {
+			Name         githubv4.String `graphql:"name"`
+			Repositories struct {
+				Edges []struct {
+					Node struct {
+						Name githubv4.String `graphql:"name"`
+					} `graphql:"node"`
+				} `graphql:"edges"`
+				PageInfo struct {
+					EndCursor   githubv4.String  `graphql:"endCursor"`
+					HasNextPage githubv4.Boolean `graphql:"hasNextPage"`
+				} `graphql:"pageInfo"`
+			} `graphql:"repositories(first: 100, after: $cursor)"`
+		} `graphql:"organization(login: $organizationName)"`
+	}
 )

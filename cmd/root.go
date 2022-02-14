@@ -26,6 +26,32 @@ type Config struct {
 	Organizations []string `mapstructure:"organizations,flow"`
 }
 
+type ListFlags struct {
+	Enterprise   string
+	Organization string
+}
+
+type User struct {
+	Login      string
+	SamlNameId string
+}
+
+type Repository struct {
+	Name string
+}
+
+type Organization struct {
+	Name         string
+	Repositories map[string]Repository
+	Users        map[string]User
+}
+
+type Enterprise struct {
+	Name          string
+	Organizations map[string]Organization
+	Users         map[string]User
+}
+
 var (
 	// Client is the githubv4 client.
 	Client *githubv4.Client
@@ -50,8 +76,7 @@ var (
 
 // Execute is the entry point for the root command.
 func Execute() {
-	err := rootCmd.Execute()
-	panicOnError(err)
+	panicOnError(rootCmd.Execute())
 }
 
 // panicOnError panics if err is not nil.
