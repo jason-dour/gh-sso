@@ -1,3 +1,7 @@
+// cmd/data
+//
+// Data gathering functions.
+
 package cmd
 
 import (

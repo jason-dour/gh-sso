@@ -43,6 +43,23 @@ var (
 		} `graphql:"enterprise(slug: $enterpriseName)"`
 	}
 
+	// EnterpriseRepositoriesQuery lists the organizations in the enterprise.
+	EnterpriseOrganizationsQuery struct {
+		Enterprise struct {
+			Organizations struct {
+				Edges []struct {
+					Node struct {
+						Login githubv4.String `graphql:"login"`
+					} `graphql:"node"`
+				} `graphql:"edges"`
+				PageInfo struct {
+					EndCursor   githubv4.String  `graphql:"endCursor"`
+					HasNextPage githubv4.Boolean `graphql:"hasNextPage"`
+				} `graphql:"pageInfo"`
+			} `graphql:"organizations(first: 100, after: $cursor1)"`
+		} `graphql:"enterprise(slug: $enterpriseName)"`
+	}
+
 	// OrganizationQuery is a GraphQL query for a Github Organization.
 	OrganizationQuery struct {
 		Organization struct {
@@ -75,23 +92,6 @@ var (
 				} `graphql:"externalIdentities(first: 100, after: $cursor)"`
 			} `graphql:"samlIdentityProvider"`
 		} `graphql:"organization(login: $organizationName)"`
-	}
-
-	// EnterpriseRepositoriesQuery lists the organizations in the enterprise.
-	EnterpriseOrganizationsQuery struct {
-		Enterprise struct {
-			Organizations struct {
-				Edges []struct {
-					Node struct {
-						Login githubv4.String `graphql:"login"`
-					} `graphql:"node"`
-				} `graphql:"edges"`
-				PageInfo struct {
-					EndCursor   githubv4.String  `graphql:"endCursor"`
-					HasNextPage githubv4.Boolean `graphql:"hasNextPage"`
-				} `graphql:"pageInfo"`
-			} `graphql:"organizations(first: 100, after: $cursor1)"`
-		} `graphql:"enterprise(slug: $enterpriseName)"`
 	}
 
 	// OrganizationRepositoriesQuery lists the repositories in the organization.
