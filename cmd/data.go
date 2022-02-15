@@ -19,6 +19,9 @@ var (
 	topOrganization Organization
 )
 
+//
+// ENTERPRISE DATA FUNCTIONS
+
 // retrieveEnterprise retrieves the top-level enterprise, confirming its existence.
 func validateEnterprise(enterprise string) error {
 	variables := map[string]interface{}{
@@ -36,27 +39,6 @@ func validateEnterprise(enterprise string) error {
 		topEnterprise.Name = string(EnterpriseQuery.Enterprise.Name)
 		topEnterprise.ID = string(EnterpriseQuery.Enterprise.ID)
 		topEnterprise.Login = enterprise
-		return nil
-	}
-}
-
-// retrieveOrganization retrieves the top-level organization, confirming its existence.
-func validateOrganization(organization string) error {
-	variables := map[string]interface{}{
-		"organizationName": githubv4.String(organization),
-	}
-
-	err := Client.Query(Ctx, &OrganizationQuery, variables)
-	if err != nil {
-		return fmt.Errorf("validateOrganization: Client.Query: %s", err.Error())
-	}
-
-	if OrganizationQuery.Organization.ID == "" {
-		return fmt.Errorf("validateOrganization: organization '%s' not found", organization)
-	} else {
-		topOrganization.Name = string(OrganizationQuery.Organization.Name)
-		topOrganization.ID = string(OrganizationQuery.Organization.ID)
-		topOrganization.Login = organization
 		return nil
 	}
 }
@@ -107,33 +89,6 @@ func retrieveEnterpriseRepos(enterprise string, org string) {
 
 		for _, edge := range OrganizationRepositoriesQuery.Organization.Repositories.Edges {
 			topEnterprise.Organizations[org].Repositories[string(edge.Node.Name)] = Repository{
-				Name: string(edge.Node.Name),
-			}
-		}
-
-		if !OrganizationRepositoriesQuery.Organization.Repositories.PageInfo.HasNextPage {
-			break
-		}
-		variables["cursor"] = githubv4.String(OrganizationRepositoriesQuery.Organization.Repositories.PageInfo.EndCursor)
-	}
-}
-
-// retrieveOrganizationRepos retrieves the top-level organization's repositories.
-func retrieveOrganizationRepos(organization string) {
-	variables := map[string]interface{}{
-		"organizationName": githubv4.String(organization),
-		"cursor":           (*githubv4.String)(nil),
-	}
-
-	if topOrganization.Repositories == nil {
-		topOrganization.Repositories = map[string]Repository{}
-	}
-	for {
-		err := Client.Query(Ctx, &OrganizationRepositoriesQuery, variables)
-		panicOnError(err)
-
-		for _, edge := range OrganizationRepositoriesQuery.Organization.Repositories.Edges {
-			topOrganization.Repositories[string(edge.Node.Name)] = Repository{
 				Name: string(edge.Node.Name),
 			}
 		}
@@ -209,6 +164,57 @@ func retrieveEnterpriseSamlIds(enterprise string) {
 			break
 		}
 		variables["cursor"] = githubv4.String(EnterpriseSamlIdpUsersQuery.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.PageInfo.EndCursor)
+	}
+}
+
+//
+// ORGANIZATION DATA FUNCTIONS
+
+// retrieveOrganization retrieves the top-level organization, confirming its existence.
+func validateOrganization(organization string) error {
+	variables := map[string]interface{}{
+		"organizationName": githubv4.String(organization),
+	}
+
+	err := Client.Query(Ctx, &OrganizationQuery, variables)
+	if err != nil {
+		return fmt.Errorf("validateOrganization: Client.Query: %s", err.Error())
+	}
+
+	if OrganizationQuery.Organization.ID == "" {
+		return fmt.Errorf("validateOrganization: organization '%s' not found", organization)
+	} else {
+		topOrganization.Name = string(OrganizationQuery.Organization.Name)
+		topOrganization.ID = string(OrganizationQuery.Organization.ID)
+		topOrganization.Login = organization
+		return nil
+	}
+}
+
+// retrieveOrganizationRepos retrieves the top-level organization's repositories.
+func retrieveOrganizationRepos(organization string) {
+	variables := map[string]interface{}{
+		"organizationName": githubv4.String(organization),
+		"cursor":           (*githubv4.String)(nil),
+	}
+
+	if topOrganization.Repositories == nil {
+		topOrganization.Repositories = map[string]Repository{}
+	}
+	for {
+		err := Client.Query(Ctx, &OrganizationRepositoriesQuery, variables)
+		panicOnError(err)
+
+		for _, edge := range OrganizationRepositoriesQuery.Organization.Repositories.Edges {
+			topOrganization.Repositories[string(edge.Node.Name)] = Repository{
+				Name: string(edge.Node.Name),
+			}
+		}
+
+		if !OrganizationRepositoriesQuery.Organization.Repositories.PageInfo.HasNextPage {
+			break
+		}
+		variables["cursor"] = githubv4.String(OrganizationRepositoriesQuery.Organization.Repositories.PageInfo.EndCursor)
 	}
 }
 

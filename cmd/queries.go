@@ -8,7 +8,7 @@ import "github.com/shurcooL/githubv4"
 
 var (
 	//
-	// ENTERPRISE LEVEL QUERIES
+	// ENTERPRISE GRAPHQL QUERIES
 
 	// EnterpriseQuery is a GraphQL query to validate a Github Enterprise Account.
 	EnterpriseQuery struct {
@@ -82,6 +82,9 @@ var (
 			} `graphql:"organizations(first: 100, after: $cursor1)"`
 		} `graphql:"enterprise(slug: $enterpriseName)"`
 	}
+
+	//
+	// ORGANIZATION GRAPHQL QUERIES
 
 	// OrganizationQuery is a GraphQL query for a Github Organization.
 	OrganizationQuery struct {

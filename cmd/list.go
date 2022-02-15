@@ -59,17 +59,12 @@ func runList(args []string) {
 	} else if listFlags.Enterprise != "" {
 		panicOnError(validateEnterprise(listFlags.Enterprise))
 		topEnterprise.Name = listFlags.Enterprise
-		// retrieveEnterpriseOrgs(topEnterprise.Name)
-		// for _, org := range topEnterprise.Organizations {
-		// 	retrieveEnterpriseRepos(topEnterprise.Name, org.Name)
-		// }
 		retrieveEnterpriseMembers(topEnterprise.Name)
 		retrieveEnterpriseSamlIds(topEnterprise.Name)
 		listEnterpriseUsers(topEnterprise)
 	} else if listFlags.Organization != "" {
 		panicOnError(validateOrganization(listFlags.Organization))
 		topOrganization.Name = listFlags.Organization
-		// retrieveOrganizationRepos(topOrganization.Name)
 		retrieveOrganizationUsers(topOrganization.Name)
 		listOrganizationUsers(topOrganization)
 	}

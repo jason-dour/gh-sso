@@ -15,55 +15,60 @@ import (
 )
 
 const (
-	// Version is the current version of gh-sso.
+	// Version - Current version of gh-sso.
 	VERSION = "0.0.1"
 )
 
-// Config is the configuration struct.
+// Configuration object.
 type Config struct {
 	// GitHub API token.
 	Token         string   `mapstructure:"token"`
 	Organizations []string `mapstructure:"organizations,flow"`
 }
 
+// lstCmd flags.
 type ListFlags struct {
 	Enterprise   string
 	Organization string
 }
 
+// User - User details.
 type User struct {
 	Name       string
 	SamlNameId string
 }
 
+// Repository - Individual repository in an organization.
 type Repository struct {
 	Name string
 }
 
+// Organization - Top-Level organization; also used for Enterprise member orgs.
 type Organization struct {
+	ID           string
 	Login        string
 	Name         string
-	ID           string
 	Repositories map[string]Repository
 	Users        map[string]User
 }
 
+// Enterprise - Top-level enterprise.
 type Enterprise struct {
+	ID            string
 	Login         string
 	Name          string
-	ID            string
 	Organizations map[string]Organization
 	Users         map[string]User
 }
 
 var (
-	// Client is the githubv4 client.
+	// Client for use with githubv4.
 	Client *githubv4.Client
 
-	// Ctx is the context.
+	// Context.
 	Ctx context.Context
 
-	// Struct to hold the configuration.
+	// Configuration.
 	Cfg Config
 
 	// Config file given on command line.
