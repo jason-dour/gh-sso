@@ -32,7 +32,7 @@ type ListFlags struct {
 }
 
 type User struct {
-	Login      string
+	Name       string
 	SamlNameId string
 }
 

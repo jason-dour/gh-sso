@@ -34,19 +34,19 @@ func init() {
 
 // listEnterpriseUsers() - lists all users in the enterprise.
 func listEnterpriseUsers(enterprise Enterprise) {
-	fmt.Printf("%-32s %-48s\n", "Login", "SAML NameID")
-	fmt.Printf("%-32s %-48s\n", "-----", "-----------")
-	for _, user := range enterprise.Users {
-		fmt.Printf("%-32s %-48s\n", user.Login, user.SamlNameId)
+	fmt.Printf("%-40s %-40s\n", "Login", "SAML NameID")
+	fmt.Printf("%-40s %-40s\n", "-----", "-----------")
+	for name, user := range enterprise.Users {
+		fmt.Printf("%-40s %-40s\n", name, user.SamlNameId)
 	}
 }
 
 // listOrganizationUsers() - lists all users in the organization.
 func listOrganizationUsers(organization Organization) {
-	fmt.Printf("%-32s %-48s\n", "Login", "SAML NameID")
-	fmt.Printf("%-32s %-48s\n", "-----", "-----------")
-	for _, user := range organization.Users {
-		fmt.Printf("%-32s %-48s\n", user.Login, user.SamlNameId)
+	fmt.Printf("%-40s %-40s\n", "Login", "SAML NameID")
+	fmt.Printf("%-40s %-40s\n", "-----", "-----------")
+	for name, user := range organization.Users {
+		fmt.Printf("%-40s %-40s\n", name, user.SamlNameId)
 	}
 }
 
@@ -61,7 +61,8 @@ func runList(args []string) {
 		// for _, org := range topEnterprise.Organizations {
 		// 	retrieveEnterpriseRepos(topEnterprise.Name, org.Name)
 		// }
-		retrieveEnterpriseUsers(topEnterprise.Name)
+		retrieveEnterpriseMembers(topEnterprise.Name)
+		retrieveEnterpriseSamlIds(topEnterprise.Name)
 		listEnterpriseUsers(topEnterprise)
 	} else if listFlags.Organization != "" {
 		panicOnError(validateOrganization(listFlags.Organization))

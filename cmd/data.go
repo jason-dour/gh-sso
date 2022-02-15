@@ -55,13 +55,15 @@ func retrieveEnterpriseOrgs(enterprise string) {
 		"cursor1":        (*githubv4.String)(nil),
 	}
 
-	orgs := map[string]Organization{}
+	if topEnterprise.Organizations == nil {
+		topEnterprise.Organizations = map[string]Organization{}
+	}
 	for {
 		err := Client.Query(Ctx, &EnterpriseOrganizationsQuery, variables)
 		panicOnError(err)
 
 		for _, edge := range EnterpriseOrganizationsQuery.Enterprise.Organizations.Edges {
-			orgs[string(edge.Node.Login)] = Organization{
+			topEnterprise.Organizations[string(edge.Node.Login)] = Organization{
 				Name:         string(edge.Node.Login),
 				Repositories: map[string]Repository{},
 				Users:        map[string]User{},
@@ -73,7 +75,6 @@ func retrieveEnterpriseOrgs(enterprise string) {
 		}
 		variables["cursor1"] = githubv4.String(EnterpriseOrganizationsQuery.Enterprise.Organizations.PageInfo.EndCursor)
 	}
-	topEnterprise.Organizations = orgs
 }
 
 func retrieveEnterpriseRepos(enterprise string, org string) {
@@ -82,13 +83,16 @@ func retrieveEnterpriseRepos(enterprise string, org string) {
 		"cursor":           (*githubv4.String)(nil),
 	}
 
-	repos := map[string]Repository{}
+	if topEnterprise.Organizations[org].Repositories == nil {
+		orgtemp := topEnterprise.Organizations[org]
+		orgtemp.Repositories = map[string]Repository{}
+	}
 	for {
 		err := Client.Query(Ctx, &OrganizationRepositoriesQuery, variables)
 		panicOnError(err)
 
 		for _, edge := range OrganizationRepositoriesQuery.Organization.Repositories.Edges {
-			repos[string(edge.Node.Name)] = Repository{
+			topEnterprise.Organizations[org].Repositories[string(edge.Node.Name)] = Repository{
 				Name: string(edge.Node.Name),
 			}
 		}
@@ -98,8 +102,6 @@ func retrieveEnterpriseRepos(enterprise string, org string) {
 		}
 		variables["cursor"] = githubv4.String(OrganizationRepositoriesQuery.Organization.Repositories.PageInfo.EndCursor)
 	}
-	org2 := topEnterprise.Organizations[org]
-	org2.Repositories = repos
 }
 
 func retrieveOrganizationRepos(organization string) {
@@ -108,13 +110,15 @@ func retrieveOrganizationRepos(organization string) {
 		"cursor":           (*githubv4.String)(nil),
 	}
 
-	repos := map[string]Repository{}
+	if topOrganization.Repositories == nil {
+		topOrganization.Repositories = map[string]Repository{}
+	}
 	for {
 		err := Client.Query(Ctx, &OrganizationRepositoriesQuery, variables)
 		panicOnError(err)
 
 		for _, edge := range OrganizationRepositoriesQuery.Organization.Repositories.Edges {
-			repos[string(edge.Node.Name)] = Repository{
+			topOrganization.Repositories[string(edge.Node.Name)] = Repository{
 				Name: string(edge.Node.Name),
 			}
 		}
@@ -124,24 +128,64 @@ func retrieveOrganizationRepos(organization string) {
 		}
 		variables["cursor"] = githubv4.String(OrganizationRepositoriesQuery.Organization.Repositories.PageInfo.EndCursor)
 	}
-	topOrganization.Repositories = repos
 }
 
-func retrieveEnterpriseUsers(enterprise string) {
+func retrieveEnterpriseMembers(enterprise string) {
 	variables := map[string]interface{}{
 		"enterpriseName": githubv4.String(enterprise),
 		"cursor":         (*githubv4.String)(nil),
 	}
 
-	users := map[string]User{}
+	if topEnterprise.Users == nil {
+		topEnterprise.Users = map[string]User{}
+	}
+
+	for {
+		err := Client.Query(Ctx, &EnterpriseMembersQuery, variables)
+		panicOnError(err)
+
+		for _, edge := range EnterpriseMembersQuery.Enterprise.Members.Edges {
+			if _, ok := topEnterprise.Users[string(edge.Node.EnterpriseUserAccount.Login)]; !ok {
+				topEnterprise.Users[string(edge.Node.EnterpriseUserAccount.Login)] = User{
+					Name: string(edge.Node.EnterpriseUserAccount.Name),
+				}
+			} else {
+				tmpUser := topEnterprise.Users[string(edge.Node.EnterpriseUserAccount.Login)]
+				tmpUser.Name = string(edge.Node.EnterpriseUserAccount.Name)
+				topEnterprise.Users[string(edge.Node.EnterpriseUserAccount.Login)] = tmpUser
+			}
+		}
+		if !EnterpriseMembersQuery.Enterprise.Members.PageInfo.HasNextPage {
+			break
+		}
+		variables["cursor"] = githubv4.String(EnterpriseMembersQuery.Enterprise.Members.PageInfo.EndCursor)
+	}
+}
+
+func retrieveEnterpriseSamlIds(enterprise string) {
+	variables := map[string]interface{}{
+		"enterpriseName": githubv4.String(enterprise),
+		"cursor":         (*githubv4.String)(nil),
+	}
+
+	if topEnterprise.Users == nil {
+		topEnterprise.Users = map[string]User{}
+	}
 	for {
 		err := Client.Query(Ctx, &EnterpriseSamlIdpUsersQuery, variables)
 		panicOnError(err)
 
 		for _, edge := range EnterpriseSamlIdpUsersQuery.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.Edges {
-			users[string(edge.Node.User.Login)] = User{
-				Login:      string(edge.Node.User.Login),
-				SamlNameId: string(edge.Node.SamlIdentity.NameId),
+			if _, ok := topEnterprise.Users[string(edge.Node.User.Login)]; !ok {
+				fmt.Printf("not ok, new %s\n", edge.Node.User.Login)
+				topEnterprise.Users[string(edge.Node.User.Login)] = User{
+					Name:       string(edge.Node.User.Name),
+					SamlNameId: string(edge.Node.SamlIdentity.NameId),
+				}
+			} else {
+				tmpUser := topEnterprise.Users[string(edge.Node.User.Login)]
+				tmpUser.SamlNameId = string(edge.Node.SamlIdentity.NameId)
+				topEnterprise.Users[string(edge.Node.User.Login)] = tmpUser
 			}
 		}
 		if !EnterpriseSamlIdpUsersQuery.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.PageInfo.HasNextPage {
@@ -149,7 +193,6 @@ func retrieveEnterpriseUsers(enterprise string) {
 		}
 		variables["cursor"] = githubv4.String(EnterpriseSamlIdpUsersQuery.Enterprise.OwnerInfo.SamlIdentityProvider.ExternalIdentities.PageInfo.EndCursor)
 	}
-	topEnterprise.Users = users
 }
 
 func retrieveOrganizationUsers(organization string) {
@@ -158,14 +201,16 @@ func retrieveOrganizationUsers(organization string) {
 		"cursor":           (*githubv4.String)(nil),
 	}
 
-	users := map[string]User{}
+	if topOrganization.Users == nil {
+		topOrganization.Users = map[string]User{}
+	}
 	for {
 		err := Client.Query(Ctx, &OrganizationSamlIdpUsersQuery, variables)
 		panicOnError(err)
 
 		for _, edge := range OrganizationSamlIdpUsersQuery.Organization.SamlIdentityProvider.ExternalIdentities.Edges {
-			users[string(edge.Node.User.Login)] = User{
-				Login:      string(edge.Node.User.Login),
+			topOrganization.Users[string(edge.Node.User.Login)] = User{
+				Name:       string(edge.Node.User.Name),
 				SamlNameId: string(edge.Node.SamlIdentity.NameId),
 			}
 		}
@@ -174,5 +219,4 @@ func retrieveOrganizationUsers(organization string) {
 		}
 		variables["cursor"] = githubv4.String(OrganizationSamlIdpUsersQuery.Organization.SamlIdentityProvider.ExternalIdentities.PageInfo.EndCursor)
 	}
-	topOrganization.Users = users
 }

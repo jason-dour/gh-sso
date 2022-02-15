@@ -7,7 +7,10 @@ package cmd
 import "github.com/shurcooL/githubv4"
 
 var (
-	// EnterpriseQuery is a GraphQL query for a Github Enterprise Account.
+	//
+	// ENTERPRISE LEVEL QUERIES
+
+	// EnterpriseQuery is a GraphQL query to validate a Github Enterprise Account.
 	EnterpriseQuery struct {
 		Enterprise struct {
 			ID   githubv4.String `graphql:"id"`
@@ -15,7 +18,27 @@ var (
 		} `graphql:"enterprise(slug: $enterpriseName)"`
 	}
 
-	// EnterpriseSamlIdpUsersQuery is a GraphQL query for a Github Enterprise Account SAML IDP Users.
+	// EnterpriseUsersQuery is a GraphQL query to retrieve all users in an Enterprise.
+	EnterpriseMembersQuery struct {
+		Enterprise struct {
+			Members struct {
+				Edges []struct {
+					Node struct {
+						EnterpriseUserAccount struct {
+							Login githubv4.String `graphql:"login"`
+							Name  githubv4.String `graphql:"name"`
+						} `graphql:"... on EnterpriseUserAccount"`
+					} `graphql:"node"`
+				} `graphql:"edges"`
+				PageInfo struct {
+					EndCursor   githubv4.String  `graphql:"endCursor"`
+					HasNextPage githubv4.Boolean `graphql:"hasNextPage"`
+				} `graphql:"pageInfo"`
+			} `graphql:"members(first: 100, after: $cursor)"`
+		} `graphql:"enterprise(slug: $enterpriseName)"`
+	}
+
+	// EnterpriseSamlIdpUsersQuery is a GraphQL query for a Github Enterprise Account's SAML IDP User details.
 	EnterpriseSamlIdpUsersQuery struct {
 		Enterprise struct {
 			OwnerInfo struct {
@@ -25,11 +48,11 @@ var (
 							Node struct {
 								Guid         githubv4.String `graphql:"guid"`
 								SamlIdentity struct {
-									NameId   githubv4.String `graphql:"nameId"`
-									Username githubv4.String `graphql:"username"`
+									NameId githubv4.String `graphql:"nameId"`
 								} `graphql:"samlIdentity"`
 								User struct {
 									Login githubv4.String `graphql:"login"`
+									Name  githubv4.String `graphql:"name"`
 								} `graphql:"user"`
 							} `graphql:"node"`
 						} `graphql:"edges"`
@@ -82,6 +105,7 @@ var (
 							} `graphql:"samlIdentity"`
 							User struct {
 								Login githubv4.String `graphql:"login"`
+								Name  githubv4.String `graphql:"name"`
 							} `graphql:"user"`
 						} `graphql:"node"`
 					} `graphql:"edges"`
