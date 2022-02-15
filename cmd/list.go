@@ -34,6 +34,7 @@ func init() {
 
 // listEnterpriseUsers() - lists all users in the enterprise.
 func listEnterpriseUsers(enterprise Enterprise) {
+	fmt.Printf("Enterprise: %s (%s; %s)\n\n", EnterpriseQuery.Enterprise.Name, enterprise, EnterpriseQuery.Enterprise.ID)
 	fmt.Printf("%-40s %-40s\n", "Login", "SAML NameID")
 	fmt.Printf("%-40s %-40s\n", "-----", "-----------")
 	for name, user := range enterprise.Users {
@@ -43,6 +44,7 @@ func listEnterpriseUsers(enterprise Enterprise) {
 
 // listOrganizationUsers() - lists all users in the organization.
 func listOrganizationUsers(organization Organization) {
+	fmt.Printf("Organization: %s (%s; %s)\n\n", OrganizationQuery.Organization.Name, organization, OrganizationQuery.Organization.ID)
 	fmt.Printf("%-40s %-40s\n", "Login", "SAML NameID")
 	fmt.Printf("%-40s %-40s\n", "-----", "-----------")
 	for name, user := range organization.Users {

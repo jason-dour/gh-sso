@@ -11,44 +11,57 @@ import (
 )
 
 var (
-	topEnterprise   Enterprise
+	// Top-Level Entities
+	//
+	// topEnterprise is the top-level enterprise.
+	topEnterprise Enterprise
+	// topOrganization is the top-level organization.
 	topOrganization Organization
 )
 
+// retrieveEnterprise retrieves the top-level enterprise, confirming its existence.
 func validateEnterprise(enterprise string) error {
 	variables := map[string]interface{}{
 		"enterpriseName": githubv4.String(enterprise),
 	}
 
 	err := Client.Query(Ctx, &EnterpriseQuery, variables)
-	panicOnError(err)
-
-	if EnterpriseQuery.Enterprise.ID == "" {
-		return fmt.Errorf("enterprise '%s' not found", enterprise)
-	} else {
-		fmt.Printf("Enterprise: %s (%s; %s)\n\n", EnterpriseQuery.Enterprise.Name, enterprise, EnterpriseQuery.Enterprise.ID)
+	if err != nil {
+		return fmt.Errorf("validateEnterprise: Client.Query: %s", err.Error())
 	}
 
-	return nil
+	if EnterpriseQuery.Enterprise.ID == "" {
+		return fmt.Errorf("validateEnterprise: enterprise '%s' not found", enterprise)
+	} else {
+		topEnterprise.Name = string(EnterpriseQuery.Enterprise.Name)
+		topEnterprise.ID = string(EnterpriseQuery.Enterprise.ID)
+		topEnterprise.Login = enterprise
+		return nil
+	}
 }
 
+// retrieveOrganization retrieves the top-level organization, confirming its existence.
 func validateOrganization(organization string) error {
 	variables := map[string]interface{}{
 		"organizationName": githubv4.String(organization),
 	}
 
 	err := Client.Query(Ctx, &OrganizationQuery, variables)
-	panicOnError(err)
-
-	if OrganizationQuery.Organization.ID == "" {
-		return fmt.Errorf("organization '%s' not found", organization)
-	} else {
-		fmt.Printf("Organization: %s (%s; %s)\n\n", OrganizationQuery.Organization.Name, organization, OrganizationQuery.Organization.ID)
+	if err != nil {
+		return fmt.Errorf("validateOrganization: Client.Query: %s", err.Error())
 	}
 
-	return nil
+	if OrganizationQuery.Organization.ID == "" {
+		return fmt.Errorf("validateOrganization: organization '%s' not found", organization)
+	} else {
+		topOrganization.Name = string(OrganizationQuery.Organization.Name)
+		topOrganization.ID = string(OrganizationQuery.Organization.ID)
+		topOrganization.Login = organization
+		return nil
+	}
 }
 
+// retrieveEnterpriseOrgs retrieves the top-level enterprise's organizations.
 func retrieveEnterpriseOrgs(enterprise string) {
 	variables := map[string]interface{}{
 		"enterpriseName": githubv4.String(enterprise),
@@ -77,6 +90,7 @@ func retrieveEnterpriseOrgs(enterprise string) {
 	}
 }
 
+// retrieveEnterpriseRepos retrieves the top-level enterprise's repositories.
 func retrieveEnterpriseRepos(enterprise string, org string) {
 	variables := map[string]interface{}{
 		"organizationName": githubv4.String(org),
@@ -104,6 +118,7 @@ func retrieveEnterpriseRepos(enterprise string, org string) {
 	}
 }
 
+// retrieveOrganizationRepos retrieves the top-level organization's repositories.
 func retrieveOrganizationRepos(organization string) {
 	variables := map[string]interface{}{
 		"organizationName": githubv4.String(organization),
@@ -130,6 +145,7 @@ func retrieveOrganizationRepos(organization string) {
 	}
 }
 
+// retrieveEnterpriseMembers retrieves the top-level enterprise's members.
 func retrieveEnterpriseMembers(enterprise string) {
 	variables := map[string]interface{}{
 		"enterpriseName": githubv4.String(enterprise),
@@ -162,6 +178,7 @@ func retrieveEnterpriseMembers(enterprise string) {
 	}
 }
 
+// retrieveEnterpriseSamlIds retrieves the top-level enterprise's SAML IDs for its users.
 func retrieveEnterpriseSamlIds(enterprise string) {
 	variables := map[string]interface{}{
 		"enterpriseName": githubv4.String(enterprise),

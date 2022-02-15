@@ -41,13 +41,17 @@ type Repository struct {
 }
 
 type Organization struct {
+	Login        string
 	Name         string
+	ID           string
 	Repositories map[string]Repository
 	Users        map[string]User
 }
 
 type Enterprise struct {
+	Login         string
 	Name          string
+	ID            string
 	Organizations map[string]Organization
 	Users         map[string]User
 }
