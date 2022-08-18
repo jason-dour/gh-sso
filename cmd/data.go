@@ -170,7 +170,7 @@ func retrieveEnterpriseSamlIds(enterprise string) {
 //
 // ORGANIZATION DATA FUNCTIONS
 
-// retrieveOrganization retrieves the top-level organization, confirming its existence.
+// validateOrganization retrieves the top-level organization, confirming its existence.
 func validateOrganization(organization string) error {
 	variables := map[string]interface{}{
 		"organizationName": githubv4.String(organization),

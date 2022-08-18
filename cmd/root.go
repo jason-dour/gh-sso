@@ -23,13 +23,14 @@ const (
 type Config struct {
 	// GitHub API token.
 	Token         string   `mapstructure:"token"`
+	Enterprises   []string `mapstructure:"enterprises,flow"`
 	Organizations []string `mapstructure:"organizations,flow"`
 }
 
 // lstCmd flags.
 type ListFlags struct {
-	Enterprise   string
-	Organization string
+	Enterprises   []string
+	Organizations []string
 }
 
 // User - User details.
