@@ -59,13 +59,19 @@ func runList(args []string) {
 
 	fmt.Printf("enterprises:\n")
 	for _, v := range Cfg.Enterprises {
-		fmt.Printf("  - %s\n", v)
+		fmt.Printf("  - %s:\n", v)
+		panicOnError(validateEnterprise(v))
+		topEnterprise.Name = v
+		retrieveEnterpriseMembers(topEnterprise.Name)
+		retrieveEnterpriseSamlIds(topEnterprise.Name)
+		listEnterpriseUsers(topEnterprise)
 	}
 
 	fmt.Printf("organizations:\n")
 	for _, v := range Cfg.Organizations {
 		fmt.Printf("  - %s\n", v)
 	}
+
 	// if listFlags.Enterprise != "" && listFlags.Organization != "" {
 	// 	panicOnError(fmt.Errorf("only one of '-e' or '-o' is allowed"))
 	// } else if listFlags.Enterprise != "" {
